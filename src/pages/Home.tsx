@@ -14,7 +14,6 @@ const Home = () => {
       .get("https://dummyjson.com/products/categories")
       .then((resp) => {
         if (resp.data) {
-          console.log(resp.data);
           setProducts(resp.data);
         }
       })
@@ -33,6 +32,9 @@ const Home = () => {
         <HomeListing title={"Laptops"} url={"laptops"} />
         <HomeListing title={"Women's Shoes"} url={"womens-shoes"} />
         <HomeListing title={"Home Decoration"} url={"home-decoration"} />
+      </div>
+      <div className="w-full bg-customDark text-silver text-center py-[8px]">
+        All rights are reserved by team Vansh @2024
       </div>
     </div>
   );

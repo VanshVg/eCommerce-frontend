@@ -8,6 +8,8 @@ module.exports = {
         white: "#ffffff",
         customDark: "#171717",
         link: "#1434a4",
+        red: "#FF0000",
+        green: "#027148",
       },
       fontFamily: {
         customFont: ["myFont", "lato"],

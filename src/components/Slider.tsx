@@ -1,4 +1,5 @@
 import Carousel from "react-material-ui-carousel";
+import { Link } from "react-router-dom";
 
 const Slider = () => {
   return (
@@ -9,9 +10,11 @@ const Slider = () => {
             <p className="mt-[20%]">Quality Electronic</p>
             <p>Products At</p>
             <p className="underline">Affordable Prices.</p>
-            <div className="border-[1px] border-customDark rounded-[5px] mt-[20px] w-[70%] text-[40px] mx-auto cursor-pointer hover:bg-customDark hover:text-silver duration-300 ease-in-out">
-              Shop Devices
-            </div>
+            <Link to={"/list/devices"}>
+              <div className="border-[1px] border-customDark rounded-[5px] mt-[20px] w-[70%] text-[40px] mx-auto cursor-pointer hover:bg-customDark hover:text-silver duration-300 ease-in-out">
+                Shop Devices
+              </div>
+            </Link>
           </div>
           <img
             src="/backgrounds/gadgetsBg.jpg"
@@ -29,9 +32,11 @@ const Slider = () => {
             <div className="mt-[30%]">
               Wear the <span className="underline">Best.</span>
             </div>
-            <div className="border-[1px] border-customDark rounded-[5px] mt-[20px] w-[70%] text-[40px] mx-auto cursor-pointer hover:bg-customDark hover:text-silver duration-300 ease-in-out">
-              Shop Clothes
-            </div>
+            <Link to={"/list/fashion"}>
+              <div className="border-[1px] border-customDark rounded-[5px] mt-[20px] w-[70%] text-[40px] mx-auto cursor-pointer hover:bg-customDark hover:text-silver duration-300 ease-in-out">
+                Shop Fashion
+              </div>
+            </Link>
           </div>
         </div>
         <div className="w-full flex h-[500px]">
@@ -42,9 +47,11 @@ const Slider = () => {
             </p>
             <p> jewellery for the</p>
             <p>discerning customer.</p>
-            <div className="border-[1px] border-customDark rounded-[5px] mt-[20px] w-[70%] text-[40px] mx-auto cursor-pointer hover:bg-customDark hover:text-silver duration-300 ease-in-out">
-              Shop Jewellery
-            </div>
+            <Link to={"/list/womens-jewellery"}>
+              <div className="border-[1px] border-customDark rounded-[5px] mt-[20px] w-[70%] text-[40px] mx-auto cursor-pointer hover:bg-customDark hover:text-silver duration-300 ease-in-out">
+                Shop Jewellery
+              </div>
+            </Link>
           </div>
           <img
             src="/backgrounds/jewelleryBg.jpg"

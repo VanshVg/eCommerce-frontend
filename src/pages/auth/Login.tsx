@@ -1,11 +1,50 @@
-import { useState } from "react";
+import { useFormik } from "formik";
+import { ChangeEvent, useState } from "react";
 import { Link } from "react-router-dom";
+import login from "../../schemas/login";
+import axios from "axios";
+
+interface errorInterface {
+  type: string;
+  message: string;
+}
 
 const Login = () => {
+  const data = {
+    username: "",
+    password: "",
+  };
   const [password, setPassword] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<errorInterface>({
+    type: "",
+    message: "",
+  });
 
   const togglePassword = (): void => {
     setPassword(!password);
+  };
+
+  const { values, errors, handleBlur, handleChange, submitForm, touched } =
+    useFormik({
+      initialValues: data,
+      validationSchema: login,
+      onSubmit: (values) => {
+        axios
+          .post(`http://192.168.10.72:4000/login`, values)
+          .then((resp) => {
+            console.log(resp);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      },
+    });
+  const handleSubmit = (): void => {
+    submitForm();
+  };
+
+  const handleInputChange = (e: ChangeEvent) => {
+    handleChange(e);
   };
 
   return (
@@ -26,9 +65,9 @@ const Login = () => {
                 className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-silver bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
                 placeholder=""
                 autoComplete="off"
-                // value={values.username}
-                // onChange={handleInputChange}
-                // onBlur={handleBlur}
+                value={values.username}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
               />
               <label
                 htmlFor="username"
@@ -37,13 +76,13 @@ const Login = () => {
                 Contact No. or Email
               </label>
             </div>
-            {/* {errors.username && touched.username ? (
+            {errors.username && touched.username ? (
               <p className="-mb-[12px] mt-[2px] text-left text-[15px] text-red">
                 {errors.username}
               </p>
             ) : (
               ""
-            )} */}
+            )}
           </div>
 
           <div className=" mt-[20px] max-w-[77%] mx-auto">
@@ -57,9 +96,9 @@ const Login = () => {
                   className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-silver bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
                   placeholder=""
                   autoComplete="off"
-                  // value={values.password}
-                  // onChange={handleInputChange}
-                  // onBlur={handleBlur}
+                  value={values.password}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
                 />
                 <label
                   htmlFor="password"
@@ -84,7 +123,7 @@ const Login = () => {
                 ></img>
               )}
             </div>
-            {/* {(errors.password && touched.password) ||
+            {(errors.password && touched.password) ||
             loginError.type === "credentials" ||
             loginError.type === "active" ? (
               <p className="-mb-[12px] mt-[2px] ml-[2px] text-left text-[15px] text-red">
@@ -92,13 +131,13 @@ const Login = () => {
               </p>
             ) : (
               ""
-            )} */}
+            )}
           </div>
         </form>
         <div
           tabIndex={3}
           className="text-blue border-[1px] bg-customDark text-white w-[150px] p-[10px] mx-auto mt-[40px] rounded-[8px] transition duration-300 hover:bg-blue cursor-pointer hover:scale-105"
-          // onClick={handleSubmit}
+          onClick={handleSubmit}
         >
           Login
         </div>

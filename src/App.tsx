@@ -6,6 +6,10 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Devices from "./pages/Categories/Devices";
+import FashionItems from "./pages/Categories/FashionItems";
+import Listing from "./pages/Listing";
+import ProductDetails from "./pages/ProductDetails";
 
 function App() {
   return (
@@ -16,6 +20,10 @@ function App() {
           <Route path="/" element={<Home />}></Route>
           <Route path="/auth/login" element={<Login />}></Route>
           <Route path="/auth/register" element={<Register />}></Route>
+          <Route path="/list/devices" element={<Devices />}></Route>
+          <Route path="/list/fashion" element={<FashionItems />}></Route>
+          <Route path="/list/:category" element={<Listing />}></Route>
+          <Route path="/product/:id" element={<ProductDetails />}></Route>
         </Routes>
       </Router>
     </div>
