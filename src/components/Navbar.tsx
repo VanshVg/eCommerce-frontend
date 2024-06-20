@@ -1,7 +1,10 @@
 import { Tooltip } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import Cookies, { Cookie } from "universal-cookie";
+import { RootState } from "../redux/store";
 
 interface categoryInterface {
   slug: string;
@@ -11,8 +14,13 @@ interface categoryInterface {
 const Navbar = () => {
   const [showCategories, setShowCategories] = useState<boolean>(false);
   const [categories, setCategories] = useState<categoryInterface[]>();
+  const [countCart, setCountCart] = useState<number>(0);
 
   const { pathname } = useLocation();
+  const cookies: Cookie = new Cookies();
+  const navigate = useNavigate();
+
+  const cartData = useSelector((state: RootState) => state.cart);
 
   useEffect(() => {
     axios
@@ -24,6 +32,23 @@ const Navbar = () => {
         console.log(error);
       });
   }, []);
+
+  useEffect(() => {
+    const token: string = cookies.get("token");
+
+    if (token) {
+      axios
+        .get(`http://192.168.10.107:4000/cart/get`, { withCredentials: true })
+        .then((resp) => {
+          if (resp.data.success) {
+            setCountCart(resp.data.cartData.length);
+          }
+        })
+        .catch((error) => {
+          navigate("/error");
+        });
+    }
+  }, [cartData]);
 
   if (pathname.includes("auth")) {
     return null;
@@ -109,7 +134,7 @@ const Navbar = () => {
         )}
       </div>
 
-      <div>
+      <div className="relative">
         <ul className="flex justify-between gap-[15px] mt-[5px]">
           <Tooltip title="Search">
             <li className="flex gap-[8px] cursor-pointer text-[18px] duration-300 ease-in-out p-[10px] rounded-[22px]">
@@ -129,6 +154,13 @@ const Navbar = () => {
             </Link>
           </Tooltip>
         </ul>
+        {countCart > 0 ? (
+          <div className="absolute top-0 right-2">
+            <p className="text-red font-bold h-[20px] w-[20px] ">{countCart}</p>
+          </div>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );

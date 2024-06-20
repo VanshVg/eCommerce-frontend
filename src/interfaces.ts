@@ -75,6 +75,11 @@ export interface productDetailsInterface {
   images: string[];
 }
 
+export interface cartInterface {
+  productData: productDetailsInterface;
+  quantity: number;
+}
+
 export interface errorInterface {
   type: string;
   message: string;

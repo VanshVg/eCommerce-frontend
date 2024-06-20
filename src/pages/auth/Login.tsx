@@ -30,7 +30,7 @@ const Login = () => {
       validationSchema: login,
       onSubmit: (values) => {
         axios
-          .post(`http://192.168.10.72:4000/login`, values)
+          .post(`http://192.168.10.107:4000/login`, values)
           .then((resp) => {
             if (resp.data.success) {
               cookies.set("token", resp.data.token, {

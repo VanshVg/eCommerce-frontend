@@ -5,21 +5,25 @@ import { useNavigate, useParams } from "react-router-dom";
 import { productDetailsInterface } from "../interfaces";
 import { Rating } from "@mui/material";
 import Cookies, { Cookie } from "universal-cookie";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/reducers/cartReducers";
+import Swal from "sweetalert2";
 
 const ProductDetails = () => {
   const [productData, setProductData] = useState<productDetailsInterface>();
   const [quantity, setQuantity] = useState<number>(1);
+  const [showCart, setShowCart] = useState<boolean>(false);
 
   const params = useParams();
   const cookies: Cookie = new Cookies();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     axios
       .get(`https://dummyjson.com/products/${params.id}`)
       .then((resp) => {
         setProductData(resp.data);
-        console.log(resp.data);
       })
       .catch((error) => {
         console.log(error);
@@ -42,7 +46,29 @@ const ProductDetails = () => {
     const token: string = cookies.get("token");
     if (!token) {
       navigate("/auth/login");
+      return;
     }
+    axios
+      .post(
+        `http://192.168.10.107:4000/cart/add`,
+        { productData: productData, quantity: quantity },
+        { withCredentials: true }
+      )
+      .then((resp) => {
+        if (resp.data.success) {
+          setShowCart(true);
+          dispatch(addToCart({ productData: productData }));
+          Swal.fire({
+            text: "Product added to cart",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const handleBuy = (): void => {
@@ -113,7 +139,7 @@ const ProductDetails = () => {
               {(productData?.stock as number) > 0 ? (
                 <div>
                   {(productData?.stock as number) < 10 ? (
-                    <p className="text-red text-[20px] mt-[10px]">
+                    <p className="text-red text-[17px] mt-[10px]">
                       Hurry Up! Only {productData?.stock} available
                     </p>
                   ) : (
@@ -149,12 +175,23 @@ const ProductDetails = () => {
               )}
             </div>
             <div className="mt-[30px] flex gap-[15px] max-w-[67%]">
-              <div
-                className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
-                onClick={handleCart}
-              >
-                Add to cart
-              </div>
+              {!showCart ? (
+                <div
+                  className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
+                  onClick={handleCart}
+                >
+                  Add to cart
+                </div>
+              ) : (
+                <div
+                  className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
+                  onClick={() => {
+                    navigate("/cart");
+                  }}
+                >
+                  Show cart
+                </div>
+              )}
               {(productData?.stock as number) > 0 ? (
                 <div
                   className="border-[1px] bg-customDark text-white py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
