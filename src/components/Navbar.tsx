@@ -122,9 +122,11 @@ const Navbar = () => {
             </li>
           </Tooltip>
           <Tooltip title="Cart">
-            <li className="flex gap-[8px] cursor-pointer text-[18px] duration-300 ease-in-out p-[10px] rounded-[22px]">
-              <img src="/icons/cart.svg" alt="cart"></img>
-            </li>
+            <Link to={"/cart"}>
+              <li className="flex gap-[8px] cursor-pointer text-[18px] duration-300 ease-in-out p-[10px] rounded-[22px]">
+                <img src="/icons/cart.svg" alt="cart"></img>
+              </li>
+            </Link>
           </Tooltip>
         </ul>
       </div>

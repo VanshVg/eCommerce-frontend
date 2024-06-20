@@ -74,3 +74,8 @@ export interface productDetailsInterface {
   thumbnail: string;
   images: string[];
 }
+
+export interface errorInterface {
+  type: string;
+  message: string;
+}

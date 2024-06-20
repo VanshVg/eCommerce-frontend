@@ -1,15 +1,18 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Carousel from "react-material-ui-carousel";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { productDetailsInterface } from "../interfaces";
 import { Rating } from "@mui/material";
+import Cookies, { Cookie } from "universal-cookie";
 
 const ProductDetails = () => {
-  const params = useParams();
-
   const [productData, setProductData] = useState<productDetailsInterface>();
   const [quantity, setQuantity] = useState<number>(1);
+
+  const params = useParams();
+  const cookies: Cookie = new Cookies();
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -35,25 +38,39 @@ const ProductDetails = () => {
     }
   };
 
+  const handleCart = (): void => {
+    const token: string = cookies.get("token");
+    if (!token) {
+      navigate("/auth/login");
+    }
+  };
+
+  const handleBuy = (): void => {
+    const token: string = cookies.get("token");
+    if (!token) {
+      navigate("/auth/login");
+    }
+  };
+
   return (
     <div className="text-customDark font-customFont pb-[50px]">
-      <div className="mt-[50px] flex justify-center gap-[70px]">
-        <div className="w-[30%] ml-[50px]">
-          <Carousel className="bg-silver">
+      <div className="mt-[50px] flex max-w-[67%] mx-auto justify-center gap-[70px]">
+        <div className="w-[50%]">
+          <Carousel className="bg-silver h-full">
             {productData &&
               productData.images?.map((element: string, index: number) => {
                 return (
                   <img
                     src={element}
                     key={index}
-                    className="max-w-[300px] h-[340px] mx-auto"
+                    className="max-w-[300px] h-full mx-auto"
                   />
                 );
               })}
           </Carousel>
         </div>
         <div className="w-[50%]">
-          <h1 className="text-[40px] text-left -mt-[15px] max-w-[500px]">
+          <h1 className="text-[40px] text-left -mt-[15px]">
             {productData?.title}
           </h1>
           <p className="text-left text-[18px] mt-[5px] font-bold">
@@ -69,7 +86,7 @@ const ProductDetails = () => {
               />
             </span>
           </div>
-          <div className="h-[1px] bg-customDark max-w-[67%] mt-[10px]"></div>
+          <div className="h-[1px] bg-customDark mt-[10px]"></div>
           <div className="text-left mt-[5px]">
             <p>
               Discount:{" "}
@@ -92,58 +109,79 @@ const ProductDetails = () => {
                 </span>
               </p>
             </p>
-            <div className="flex justify-between max-w-[67%]">
-              {(productData?.stock as number) < 10 ? (
-                <p className="text-red text-[20px] mt-[10px]">
-                  Hurry Up! Only {productData?.stock} available
-                </p>
+            <div className="flex justify-between ">
+              {(productData?.stock as number) > 0 ? (
+                <div>
+                  {(productData?.stock as number) < 10 ? (
+                    <p className="text-red text-[20px] mt-[10px]">
+                      Hurry Up! Only {productData?.stock} available
+                    </p>
+                  ) : (
+                    <p className="text-green mt-[10px] text-[18px]">
+                      In Stocks
+                    </p>
+                  )}
+                </div>
               ) : (
-                <p className="text-green mt-[10px] text-[18px]">In Stocks</p>
+                <p className="text-red mt-[10px] text-[18px]">Out of stocks</p>
               )}
-              <div className="mt-[15px]">
-                <p className="flex">
-                  {" "}
-                  <span className="font-bold">Quantity:</span>
-                  <img
-                    src="/icons/minus.svg"
-                    className="ml-[10px] mr-[15px] cursor-pointer"
-                    onClick={decreaseQuantity}
-                  />{" "}
-                  <span className="text-[20px] -mt-[5px]">{quantity} </span>{" "}
-                  <img
-                    src="/icons/plus.svg"
-                    className="ml-[15px] cursor-pointer"
-                    onClick={increaseQuantity}
-                  />
-                </p>
-              </div>
+
+              {(productData?.stock as number) > 0 ? (
+                <div className="mt-[15px]">
+                  <p className="flex">
+                    {" "}
+                    <span className="font-bold">Quantity:</span>
+                    <img
+                      src="/icons/minus.svg"
+                      className="ml-[10px] mr-[15px] cursor-pointer"
+                      onClick={decreaseQuantity}
+                    />{" "}
+                    <span className="text-[20px] -mt-[5px]">{quantity} </span>{" "}
+                    <img
+                      src="/icons/plus.svg"
+                      className="ml-[15px] cursor-pointer"
+                      onClick={increaseQuantity}
+                    />
+                  </p>
+                </div>
+              ) : (
+                ""
+              )}
             </div>
             <div className="mt-[30px] flex gap-[15px] max-w-[67%]">
-              <div className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110">
+              <div
+                className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
+                onClick={handleCart}
+              >
                 Add to cart
               </div>
-              <div className="border-[1px] bg-customDark text-white py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110">
-                Buy Now
-              </div>
+              {(productData?.stock as number) > 0 ? (
+                <div
+                  className="border-[1px] bg-customDark text-white py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
+                  onClick={handleBuy}
+                >
+                  Buy Now
+                </div>
+              ) : (
+                ""
+              )}
             </div>
           </div>
         </div>
       </div>
-      <div className="max-w-[81%] mx-auto">
+      <div className="max-w-[67%]  mx-auto">
         <div>
           <h2 className="text-left mt-[30px] text-[25px]">
             Product Description:
           </h2>
-          <div className="h-[1px] bg-customDark max-w-[85%]" />
-          <div className="text-left max-w-[85%] mt-[5px]">
-            {productData?.description}
-          </div>
+          <div className="h-[1px] bg-customDark" />
+          <div className="text-left  mt-[5px]">{productData?.description}</div>
         </div>
         <div className="text-left">
           <h2 className="text-left mt-[30px] text-[25px]">
             Extra Information:
           </h2>
-          <div className="h-[1px] bg-customDark max-w-[85%]" />
+          <div className="h-[1px] bg-customDark" />
           <p className="text-[17px] mt-[5px]">
             <span className="text-[18px] font-bold mr-[5px]">
               Return Policy:
@@ -163,8 +201,8 @@ const ProductDetails = () => {
         </div>
         <div>
           <h2 className="text-left mt-[30px] text-[25px]">Product Details:</h2>
-          <div className="h-[1px] bg-customDark max-w-[85%]" />
-          <div className="text-left max-w-[85%] mt-[5px]">
+          <div className="h-[1px] bg-customDark" />
+          <div className="text-left  mt-[5px]">
             <p className="text-[17px] mt-[5px]">
               <span className="text-[18px] font-bold mr-[5px]">
                 Product Name:
@@ -206,8 +244,8 @@ const ProductDetails = () => {
             <h2 className="text-left mt-[30px] text-[25px]">
               Customer Reviews:
             </h2>
-            <div className="h-[1px] bg-customDark max-w-[85%]" />
-            <div className="text-left max-w-[85%] mt-[5px]">
+            <div className="h-[1px] bg-customDark " />
+            <div className="text-left  mt-[5px]">
               {productData?.reviews.map((element, index: number) => {
                 return (
                   <div className="mt-[10px]">

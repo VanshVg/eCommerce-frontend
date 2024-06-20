@@ -5,7 +5,7 @@ const login = () => {
   schema = schema.shape({
     username: Yup.string()
       .trim()
-      .required("Please enter Username or Email address"),
+      .required("Please enter Contact No. or Email address"),
     password: Yup.string()
       .trim()
       .required("Please enter password")

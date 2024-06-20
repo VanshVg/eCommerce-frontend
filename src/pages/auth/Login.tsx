@@ -1,13 +1,10 @@
 import { useFormik } from "formik";
 import { ChangeEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import login from "../../schemas/login";
 import axios from "axios";
-
-interface errorInterface {
-  type: string;
-  message: string;
-}
+import { errorInterface } from "../../interfaces";
+import Cookies, { Cookie } from "universal-cookie";
 
 const Login = () => {
   const data = {
@@ -24,6 +21,9 @@ const Login = () => {
     setPassword(!password);
   };
 
+  const navigate = useNavigate();
+  const cookies: Cookie = new Cookies();
+
   const { values, errors, handleBlur, handleChange, submitForm, touched } =
     useFormik({
       initialValues: data,
@@ -32,10 +32,23 @@ const Login = () => {
         axios
           .post(`http://192.168.10.72:4000/login`, values)
           .then((resp) => {
-            console.log(resp);
+            if (resp.data.success) {
+              cookies.set("token", resp.data.token, {
+                path: "/",
+                expires: new Date(Date.now() + 2592000000),
+              });
+              navigate("/");
+            }
           })
           .catch((error) => {
-            console.log(error);
+            if (error.response.data.type === "server") {
+              navigate("/error");
+            } else if (!error.response.data.success) {
+              setLoginError({
+                type: error.response.data.type,
+                message: error.response.data.message,
+              });
+            }
           });
       },
     });
@@ -141,14 +154,9 @@ const Login = () => {
         >
           Login
         </div>
-        <p className="mt-[20px]">
-          <Link to={"/forgotPassword"} className="text-link hover:underline">
-            Forgot Password?{" "}
-          </Link>
-        </p>
         <p className="mt-[20px] text-customDark">
           New to Team Up?{" "}
-          <Link to={"/register"} className="text-link hover:underline">
+          <Link to={"/auth/register"} className="text-link hover:underline">
             Register
           </Link>
         </p>

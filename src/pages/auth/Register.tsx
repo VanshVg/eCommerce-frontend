@@ -1,15 +1,73 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { ChangeEvent, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { errorInterface } from "../../interfaces";
+import { useFormik } from "formik";
+import register from "../../schemas/register";
+import axios from "axios";
+import Cookies from "universal-cookie";
 
 const Register = () => {
+  const data = {
+    contactNo: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  };
+
   const [password, setPassword] = useState<boolean>(false);
   const [confirmPassword, setConfirmPassword] = useState<boolean>(false);
+  const [registerError, setRegisterError] = useState<errorInterface>({
+    type: "",
+    message: "",
+  });
+  const [activation, setActivation] = useState<string>("");
 
   const togglePassword = (): void => {
     setPassword(!password);
   };
   const toggleConfirmPassword = (): void => {
     setConfirmPassword(!confirmPassword);
+  };
+
+  const cookies = new Cookies();
+  const navigate = useNavigate();
+
+  const { values, errors, handleBlur, handleChange, submitForm, touched } =
+    useFormik({
+      initialValues: data,
+      validationSchema: register,
+      onSubmit: (values) => {
+        axios
+          .post(`http://192.168.10.72:4000/register`, values)
+          .then((resp) => {
+            const { data } = resp;
+            if (data.success) {
+              cookies.set("token", data.token, {
+                path: "/",
+                expires: new Date(Date.now() + 2592000000),
+              });
+              setActivation(data.verification_token);
+            }
+          })
+          .catch((error) => {
+            if (error.response.data.type === "server") {
+              navigate("/error");
+            } else if (!error.response.data.success) {
+              setRegisterError({
+                type: error.response.data.type,
+                message: error.response.data.message,
+              });
+            }
+          });
+      },
+    });
+  const handleSubmit = (): void => {
+    submitForm();
+  };
+
+  const handleInputChange = (e: ChangeEvent) => {
+    setRegisterError({ type: "", message: "" });
+    handleChange(e);
   };
 
   return (
@@ -30,9 +88,9 @@ const Register = () => {
                 className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-silver bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
                 placeholder=""
                 autoComplete="off"
-                // value={values.contactNo}
-                // onChange={handleInputChange}
-                // onBlur={handleBlur}
+                value={values.contactNo}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
               />
               <label
                 htmlFor="contactNo"
@@ -41,13 +99,14 @@ const Register = () => {
                 Contact No.
               </label>
             </div>
-            {/* {errors.username && touched.username ? (
+            {(errors.contactNo && touched.contactNo) ||
+            registerError.type === "contact_no" ? (
               <p className="-mb-[12px] mt-[2px] text-left text-[15px] text-red">
-                {errors.username}
+                {errors.contactNo || registerError.message}
               </p>
             ) : (
               ""
-            )} */}
+            )}
           </div>
           <div className="mt-[20px] max-w-[77%] mx-auto">
             <div className="relative">
@@ -59,9 +118,9 @@ const Register = () => {
                 className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-silver bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
                 placeholder=""
                 autoComplete="off"
-                // value={values.email}
-                // onChange={handleInputChange}
-                // onBlur={handleBlur}
+                value={values.email}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
               />
               <label
                 htmlFor="email"
@@ -70,13 +129,14 @@ const Register = () => {
                 Email Id
               </label>
             </div>
-            {/* {errors.username && touched.username ? (
+            {(errors.email && touched.email) ||
+            registerError.type === "email" ? (
               <p className="-mb-[12px] mt-[2px] text-left text-[15px] text-red">
-                {errors.username}
+                {errors.email || registerError.message}
               </p>
             ) : (
               ""
-            )} */}
+            )}
           </div>
 
           <div className=" mt-[20px] max-w-[77%] mx-auto">
@@ -90,9 +150,9 @@ const Register = () => {
                   className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-silver bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
                   placeholder=""
                   autoComplete="off"
-                  // value={values.password}
-                  // onChange={handleInputChange}
-                  // onBlur={handleBlur}
+                  value={values.password}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
                 />
                 <label
                   htmlFor="password"
@@ -117,15 +177,13 @@ const Register = () => {
                 ></img>
               )}
             </div>
-            {/* {(errors.password && touched.password) ||
-            loginError.type === "credentials" ||
-            loginError.type === "active" ? (
+            {errors.password && touched.password ? (
               <p className="-mb-[12px] mt-[2px] ml-[2px] text-left text-[15px] text-red">
-                {errors.password || loginError.message}
+                {errors.password}
               </p>
             ) : (
               ""
-            )} */}
+            )}
           </div>
           <div className=" mt-[20px] max-w-[77%] mx-auto">
             <div className="flex">
@@ -138,9 +196,9 @@ const Register = () => {
                   className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-silver bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
                   placeholder=""
                   autoComplete="off"
-                  // value={values.confirmPassword}
-                  // onChange={handleInputChange}
-                  // onBlur={handleBlur}
+                  value={values.confirmPassword}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
                 />
                 <label
                   htmlFor="confirmPassword"
@@ -165,27 +223,38 @@ const Register = () => {
                 ></img>
               )}
             </div>
-            {/* {(errors.password && touched.password) ||
-            loginError.type === "credentials" ||
-            loginError.type === "active" ? (
+            {(errors.password && touched.password) ||
+            registerError.type === "credentials" ||
+            registerError.type === "active" ? (
               <p className="-mb-[12px] mt-[2px] ml-[2px] text-left text-[15px] text-red">
-                {errors.password || loginError.message}
+                {errors.password || registerError.message}
               </p>
             ) : (
               ""
-            )} */}
+            )}
           </div>
         </form>
+        <div className="text-link hover:underline mt-[5px] -mb-[15px]">
+          {activation ? (
+            <Link
+              to={`http://192.168.10.72:3000/auth/activation/${activation}`}
+            >
+              http://192.168.10.72:3000/auth/activation/{activation}
+            </Link>
+          ) : (
+            ""
+          )}
+        </div>
         <div
           tabIndex={3}
           className="text-blue border-[1px] bg-customDark text-white w-[150px] p-[10px] mx-auto mt-[40px] rounded-[8px] transition duration-300 hover:bg-blue cursor-pointer hover:scale-105"
-          // onClick={handleSubmit}
+          onClick={handleSubmit}
         >
           Register
         </div>
         <p className="mt-[20px] text-customDark">
-          New to Team Up?{" "}
-          <Link to={"/register"} className="text-link hover:underline">
+          Already a user?{" "}
+          <Link to={"/auth/login"} className="text-link hover:underline">
             Login
           </Link>
         </p>
