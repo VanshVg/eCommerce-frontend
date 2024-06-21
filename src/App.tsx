@@ -15,6 +15,7 @@ import Protected from "./components/Protected";
 import Cart from "./pages/cart/Cart";
 import AuthRoutes from "./components/AuthRoutes";
 import Error from "./pages/Error";
+import Orders from "./pages/Orders/Orders";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetails />}></Route>
           <Route element={<Protected />}>
             <Route path="/cart" element={<Cart />}></Route>
+            <Route path="/orders" element={<Orders />}></Route>
           </Route>
           <Route path="*" element={<Error />}></Route>
         </Routes>

@@ -116,6 +116,22 @@ const Navbar = () => {
               />
             )}
           </div>
+          {token ? (
+            <Link to={"/orders"}>
+              {" "}
+              <li
+                className={
+                  pathname === "/orders"
+                    ? "flex gap-[8px] cursor-pointer text-[18px] hover:bg-silver duration-300 ease-in-out p-[10px] rounded-[22px] font-bold underline"
+                    : "flex gap-[8px] cursor-pointer text-[18px] hover:bg-silver duration-300 ease-in-out p-[10px] rounded-[22px]"
+                }
+              >
+                Orders
+              </li>
+            </Link>
+          ) : (
+            ""
+          )}
         </ul>
         {showCategories ? (
           <div

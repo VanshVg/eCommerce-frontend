@@ -94,14 +94,30 @@ const ProductDetails = () => {
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire({
-          text: "Product purchased successfully",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 2000,
-        }).then(() => {
-          navigate("/");
-        });
+        let products = [
+          { productData: JSON.stringify(productData), quantity: quantity },
+        ];
+        axios
+          .post(
+            `http://192.168.10.107:4000/order/add`,
+            { products: products },
+            { withCredentials: true }
+          )
+          .then((resp) => {
+            if (resp.data.success) {
+              Swal.fire({
+                text: "Product purchased successfully",
+                icon: "success",
+                showConfirmButton: false,
+                timer: 2000,
+              }).then(() => {
+                navigate("/orders");
+              });
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       }
     });
   };
@@ -208,35 +224,35 @@ const ProductDetails = () => {
                 ""
               )}
             </div>
-            <div className="mt-[30px] flex gap-[15px] max-w-[67%]">
-              {!showCart ? (
-                <div
-                  className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
-                  onClick={handleCart}
-                >
-                  Add to cart
-                </div>
-              ) : (
-                <div
-                  className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
-                  onClick={() => {
-                    navigate("/cart");
-                  }}
-                >
-                  Show cart
-                </div>
-              )}
-              {(productData?.stock as number) > 0 ? (
+            {(productData?.stock as number) > 0 ? (
+              <div className="mt-[30px] flex gap-[15px] max-w-[67%]">
+                {!showCart ? (
+                  <div
+                    className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
+                    onClick={handleCart}
+                  >
+                    Add to cart
+                  </div>
+                ) : (
+                  <div
+                    className="border-[1px] py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
+                    onClick={() => {
+                      navigate("/cart");
+                    }}
+                  >
+                    Show cart
+                  </div>
+                )}
                 <div
                   className="border-[1px] bg-customDark text-white py-[10px] cursor-pointer border-customDark w-[150px] text-center duration-300 ease-in-out hover:scale-110"
                   onClick={handleBuy}
                 >
                   Buy Now
                 </div>
-              ) : (
-                ""
-              )}
-            </div>
+              </div>
+            ) : (
+              ""
+            )}
           </div>
         </div>
       </div>

@@ -7,7 +7,7 @@ const Slider = () => {
       <Carousel>
         <div className="w-full flex h-[500px]">
           <div className="w-[40%] pl-[30px] bg-silver italic font-customFont text-customDark font-bold text-[60px]">
-            <p className="mt-[20%]">Quality Electronic</p>
+            <p className="mt-[45px]">Quality Electronic</p>
             <p>Products At</p>
             <p className="underline">Affordable Prices.</p>
             <Link to={"/list/devices"}>
@@ -29,7 +29,7 @@ const Slider = () => {
             alt="image2"
           />
           <div className="w-[40%] bg-silver italic font-customFont text-customDark font-bold text-[60px]">
-            <div className="mt-[30%]">
+            <div className="mt-[150px]">
               Wear the <span className="underline">Best.</span>
             </div>
             <Link to={"/list/fashion"}>
@@ -41,7 +41,7 @@ const Slider = () => {
         </div>
         <div className="w-full flex h-[500px]">
           <div className="w-[60%] bg-silver italic font-customFont text-customDark font-bold text-[55px]">
-            <p className="mt-[10%]">
+            <p className="mt-[80px]">
               <span className="underline">Unique</span> and{" "}
               <span className="underline">exquisite</span>
             </p>

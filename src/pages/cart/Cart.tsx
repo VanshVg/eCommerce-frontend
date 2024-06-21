@@ -111,14 +111,13 @@ const Cart = () => {
   const handleCheckout = (): void => {
     Swal.fire({
       title: "Checkout Confirmation",
-      text: "Are sure you want to checkout?",
       icon: "warning",
       showConfirmButton: true,
       showCancelButton: true,
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes",
-      confirmButtonColor: "#2554c7",
-      color: "#28183b",
+      confirmButtonText: `Pay $${totalAmount.toFixed(2)}`,
+      confirmButtonColor: "#171717",
+      color: "#171717",
       showLoaderOnConfirm: true,
     }).then((result) => {
       if (result.isConfirmed) {
@@ -129,12 +128,37 @@ const Cart = () => {
           .then((resp) => {
             if (resp.data.success) {
               dispatch(checkout());
-              Swal.fire({
-                text: "Checkout successfull",
-                icon: "success",
-                showConfirmButton: false,
-                timer: 2000,
+              let products: {
+                productData: string;
+                quantity: number;
+              }[] = [];
+              cartData?.forEach((element) => {
+                products.push({
+                  productData: element.product_data,
+                  quantity: element.quantity,
+                });
               });
+              axios
+                .post(
+                  `http://192.168.10.107:4000/order/add`,
+                  { products: products },
+                  { withCredentials: true }
+                )
+                .then((resp) => {
+                  if (resp.data.success) {
+                    Swal.fire({
+                      text: "Checkout successful",
+                      icon: "success",
+                      showConfirmButton: false,
+                      timer: 2000,
+                    }).then(() => {
+                      navigate("/orders");
+                    });
+                  }
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
             }
           })
           .catch((error) => {
