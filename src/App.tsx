@@ -13,6 +13,8 @@ import ProductDetails from "./pages/ProductDetails";
 import Activation from "./pages/auth/Activation";
 import Protected from "./components/Protected";
 import Cart from "./pages/cart/Cart";
+import AuthRoutes from "./components/AuthRoutes";
+import Error from "./pages/Error";
 
 function App() {
   return (
@@ -20,18 +22,23 @@ function App() {
       <Router>
         <Navbar />
         <Routes>
+          <Route element={<AuthRoutes />}>
+            <Route path="/auth/login" element={<Login />}></Route>
+            <Route path="/auth/register" element={<Register />}></Route>
+            <Route
+              path="/auth/activation/:token"
+              element={<Activation />}
+            ></Route>
+          </Route>
           <Route path="/" element={<Home />}></Route>
-          <Route path="/auth/login" element={<Login />}></Route>
-          <Route path="/auth/register" element={<Register />}></Route>
           <Route path="/list/devices" element={<Devices />}></Route>
           <Route path="/list/fashion" element={<FashionItems />}></Route>
           <Route path="/list/:category" element={<Listing />}></Route>
           <Route path="/product/:id" element={<ProductDetails />}></Route>
-          <Route
-            path="/auth/activation/:token"
-            element={<Activation />}
-          ></Route>
-          <Route path="/cart" element={<Protected Component={Cart} />}></Route>
+          <Route element={<Protected />}>
+            <Route path="/cart" element={<Cart />}></Route>
+          </Route>
+          <Route path="*" element={<Error />}></Route>
         </Routes>
       </Router>
     </div>

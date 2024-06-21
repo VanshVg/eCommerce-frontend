@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { productInterface } from "../../interfaces";
 import { Rating } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type propsType = {
   url: string;
@@ -12,6 +12,9 @@ type propsType = {
 const HomeListing = (props: propsType) => {
   const { url, title } = props;
   const [product, setProduct] = useState<productInterface[]>();
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     axios
       .get(`https://dummyjson.com/products/category/${url}?limit=3`)
@@ -19,7 +22,7 @@ const HomeListing = (props: propsType) => {
         setProduct(resp.data.products);
       })
       .catch((error) => {
-        console.log(error);
+        navigate("/error");
       });
   }, [url]);
   return (
@@ -28,12 +31,12 @@ const HomeListing = (props: propsType) => {
         {title}
       </h2>
       <div className="h-[1px] bg-customDark mx-auto w-[50%]"></div>
-      <div className="flex justify-center gap-[25px] px-[30px] mt-[20px]">
+      <div className="flex justify-center gap-[25px] bg-red px-[30px] mt-[20px]">
         {product &&
           product.map((element: productInterface, index: number) => (
             <Link to={`/product/${element.id}`}>
               <div
-                className="bg-silver rounded-[5px] cursor-pointer p-[20px] hover:scale-110 duration-300 ease-in-out"
+                className="bg-silver rounded-[5px] cursor-pointer p-[20px] hover:scale-110 duration-300 ease-in-out mt-[20px]"
                 key={index}
               >
                 <div className="mx-auto ">

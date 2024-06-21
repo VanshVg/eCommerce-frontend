@@ -5,6 +5,7 @@ import login from "../../schemas/login";
 import axios from "axios";
 import { errorInterface } from "../../interfaces";
 import Cookies, { Cookie } from "universal-cookie";
+import { Helmet } from "react-helmet";
 
 const Login = () => {
   const data = {
@@ -62,6 +63,9 @@ const Login = () => {
 
   return (
     <div className="w-[40%] bg-silver mx-auto shadow-[1px_1px_1px_1px_silver] rounded-[5px] mt-[12%] p-[20px]">
+      <Helmet>
+        <title>Login</title>
+      </Helmet>
       <div>
         <h1 className="text-customDark text-[30px] p-[10px] font-bold">
           E-commerce Login

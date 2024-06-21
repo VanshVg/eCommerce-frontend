@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import register from "../../schemas/register";
 import axios from "axios";
 import Cookies from "universal-cookie";
+import { Helmet } from "react-helmet";
 
 const Register = () => {
   const data = {
@@ -72,6 +73,9 @@ const Register = () => {
 
   return (
     <div className="w-[40%] bg-silver mx-auto shadow-[1px_1px_1px_1px_silver] rounded-[5px] mt-[5%] p-[20px]">
+      <Helmet>
+        <title>Register</title>
+      </Helmet>
       <div>
         <h1 className="text-customDark text-[30px] p-[10px] font-bold">
           E-commerce Register

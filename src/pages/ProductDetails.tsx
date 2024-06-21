@@ -8,6 +8,7 @@ import Cookies, { Cookie } from "universal-cookie";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/reducers/cartReducers";
 import Swal from "sweetalert2";
+import { Helmet } from "react-helmet";
 
 const ProductDetails = () => {
   const [productData, setProductData] = useState<productDetailsInterface>();
@@ -26,17 +27,19 @@ const ProductDetails = () => {
         setProductData(resp.data);
       })
       .catch((error) => {
-        console.log(error);
+        navigate("/error");
       });
   }, [params.id]);
 
   const increaseQuantity = (): void => {
+    setShowCart(false);
     if (quantity !== productData?.stock) {
       setQuantity(quantity + 1);
     }
   };
 
   const decreaseQuantity = (): void => {
+    setShowCart(false);
     if (quantity !== 1) {
       setQuantity(quantity - 1);
     }
@@ -57,7 +60,7 @@ const ProductDetails = () => {
       .then((resp) => {
         if (resp.data.success) {
           setShowCart(true);
-          dispatch(addToCart({ productData: productData }));
+          dispatch(addToCart({ productData: productData, quantity: quantity }));
           Swal.fire({
             text: "Product added to cart",
             icon: "success",
@@ -67,7 +70,7 @@ const ProductDetails = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
+        navigate("/error");
       });
   };
 
@@ -75,11 +78,39 @@ const ProductDetails = () => {
     const token: string = cookies.get("token");
     if (!token) {
       navigate("/auth/login");
+      return;
     }
+    Swal.fire({
+      title: "Purchase Confirmation",
+      icon: "warning",
+      showConfirmButton: true,
+      showCancelButton: true,
+      cancelButtonColor: "#d33",
+      confirmButtonText: `Pay $${(
+        (productData?.price as number) * quantity
+      ).toFixed(2)}`,
+      confirmButtonColor: "#171717",
+      color: "#171717",
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          text: "Product purchased successfully",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 2000,
+        }).then(() => {
+          navigate("/");
+        });
+      }
+    });
   };
 
   return (
     <div className="text-customDark font-customFont pb-[50px]">
+      <Helmet>
+        <title>{productData?.title}</title>
+      </Helmet>
       <div className="mt-[50px] flex max-w-[67%] mx-auto justify-center gap-[70px]">
         <div className="w-[50%]">
           <Carousel className="bg-silver h-full">
@@ -90,6 +121,7 @@ const ProductDetails = () => {
                     src={element}
                     key={index}
                     className="max-w-[300px] h-full mx-auto"
+                    alt=""
                   />
                 );
               })}
@@ -160,12 +192,14 @@ const ProductDetails = () => {
                     <img
                       src="/icons/minus.svg"
                       className="ml-[10px] mr-[15px] cursor-pointer"
+                      alt=""
                       onClick={decreaseQuantity}
                     />{" "}
                     <span className="text-[20px] -mt-[5px]">{quantity} </span>{" "}
                     <img
                       src="/icons/plus.svg"
                       className="ml-[15px] cursor-pointer"
+                      alt=""
                       onClick={increaseQuantity}
                     />
                   </p>

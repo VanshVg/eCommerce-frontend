@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Cookies, { Cookie } from "universal-cookie";
 import { RootState } from "../redux/store";
+import Swal from "sweetalert2";
 
 interface categoryInterface {
   slug: string;
@@ -20,6 +21,8 @@ const Navbar = () => {
   const cookies: Cookie = new Cookies();
   const navigate = useNavigate();
 
+  const token: string = cookies.get("token");
+
   const cartData = useSelector((state: RootState) => state.cart);
 
   useEffect(() => {
@@ -29,30 +32,46 @@ const Navbar = () => {
         setCategories(resp.data);
       })
       .catch((error) => {
-        console.log(error);
+        navigate("/error");
       });
   }, []);
 
   useEffect(() => {
-    const token: string = cookies.get("token");
-
     if (token) {
-      axios
-        .get(`http://192.168.10.107:4000/cart/get`, { withCredentials: true })
-        .then((resp) => {
-          if (resp.data.success) {
-            setCountCart(resp.data.cartData.length);
-          }
-        })
-        .catch((error) => {
-          navigate("/error");
-        });
+      setCountCart(cartData.cart.length);
     }
-  }, [cartData]);
+  }, [cartData, cookies]);
 
-  if (pathname.includes("auth")) {
+  if (pathname.includes("auth") || pathname.includes("error")) {
     return null;
   }
+
+  const handleLogout = (): void => {
+    Swal.fire({
+      title: "Logout Confirmation",
+      text: "Are sure you want to Logout?",
+      icon: "warning",
+      showConfirmButton: true,
+      showCancelButton: true,
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
+      confirmButtonColor: "#2554c7",
+      color: "#28183b",
+      showLoaderOnConfirm: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        cookies.remove("token", { path: "/" });
+        Swal.fire({
+          text: "Logout successful",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 2000,
+        });
+        setCountCart(0);
+        navigate("/");
+      }
+    });
+  };
 
   return (
     <div className="font-customFont text-dark py-[10px] px-[30px] flex justify-between max-w-[1440px] mx-auto">
@@ -84,27 +103,23 @@ const Navbar = () => {
           >
             <li>Categories</li>{" "}
             {showCategories ? (
-              <img src="/icons/down-arrow.svg" className="-ml-[8px] mt-[2px]" />
+              <img
+                src="/icons/down-arrow.svg"
+                className="-ml-[8px] mt-[2px]"
+                alt=""
+              />
             ) : (
               <img
                 src="/icons/right-arrow.svg"
                 className="-ml-[8px] mt-[2px]"
+                alt=""
               />
             )}
           </div>
-          <li
-            className={
-              pathname === "/about"
-                ? "flex gap-[8px] cursor-pointer text-[18px] hover:bg-silver duration-300 ease-in-out p-[10px] rounded-[22px] font-bold underline"
-                : "flex gap-[8px] cursor-pointer text-[18px] hover:bg-silver duration-300 ease-in-out p-[10px] rounded-[22px]"
-            }
-          >
-            About
-          </li>
         </ul>
         {showCategories ? (
           <div
-            className="absolute z-10 bg-customDark text-silver p-[10px] text-left right-[23%] top-11 rounded-[5px] h-[305px] overflow-y-auto"
+            className="absolute z-10 bg-customDark text-silver p-[10px] text-left right-[0%] top-11 rounded-[5px] h-[305px] overflow-y-auto"
             onMouseEnter={() => setShowCategories(true)}
             onMouseLeave={() => setShowCategories(false)}
           >
@@ -141,11 +156,6 @@ const Navbar = () => {
               <img src="/icons/search.svg" alt="search"></img>
             </li>
           </Tooltip>
-          <Tooltip title="Profile">
-            <li className="flex gap-[8px] cursor-pointer text-[18px] duration-300 ease-in-out p-[10px] rounded-[22px]">
-              <img src="/icons/profile.svg" alt="profile"></img>
-            </li>
-          </Tooltip>
           <Tooltip title="Cart">
             <Link to={"/cart"}>
               <li className="flex gap-[8px] cursor-pointer text-[18px] duration-300 ease-in-out p-[10px] rounded-[22px]">
@@ -153,9 +163,32 @@ const Navbar = () => {
               </li>
             </Link>
           </Tooltip>
+          {token ? (
+            <Tooltip title="Logout">
+              <li className="flex gap-[8px] cursor-pointer text-[18px] duration-300 ease-in-out p-[10px] rounded-[22px]">
+                <img
+                  src="/icons/logout.svg"
+                  alt="logout"
+                  onClick={handleLogout}
+                ></img>
+              </li>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Login">
+              <li className="flex gap-[8px] cursor-pointer text-[18px] duration-300 ease-in-out p-[10px] rounded-[22px]">
+                <img
+                  src="/icons/login.svg"
+                  alt="logout"
+                  onClick={() => {
+                    navigate("/auth/login");
+                  }}
+                ></img>
+              </li>
+            </Tooltip>
+          )}
         </ul>
         {countCart > 0 ? (
-          <div className="absolute top-0 right-2">
+          <div className="absolute top-0 right-[42%]">
             <p className="text-red font-bold h-[20px] w-[20px] ">{countCart}</p>
           </div>
         ) : (

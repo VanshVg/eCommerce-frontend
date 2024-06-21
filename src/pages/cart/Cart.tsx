@@ -10,6 +10,7 @@ import {
   removeItem,
 } from "../../redux/reducers/cartReducers";
 import { RootState } from "../../redux/store";
+import { Helmet } from "react-helmet";
 
 interface cartInterface {
   id: number;
@@ -20,7 +21,6 @@ interface cartInterface {
 const Cart = () => {
   const [cartData, setCartData] = useState<cartInterface[]>();
   const [totalAmount, setTotalAmout] = useState<number>(0);
-
   const cart = useSelector((state: RootState) => state.cart);
 
   const dispatch = useDispatch();
@@ -87,14 +87,14 @@ const Cart = () => {
     }
   };
 
-  const handleRemove = (id: number) => {
+  const handleRemove = (cartId: number, productId: number) => {
     axios
-      .delete(`http://192.168.10.107:4000/cart/remove/${id}`, {
+      .delete(`http://192.168.10.107:4000/cart/remove/${cartId}`, {
         withCredentials: true,
       })
       .then((resp) => {
         if (resp.data.success) {
-          dispatch(removeItem({ id: id }));
+          dispatch(removeItem({ id: productId }));
           Swal.fire({
             text: "Product removed from cart",
             icon: "success",
@@ -138,7 +138,6 @@ const Cart = () => {
             }
           })
           .catch((error) => {
-            console.log(error);
             navigate("/error");
           });
       }
@@ -147,6 +146,9 @@ const Cart = () => {
 
   return (
     <div className="mb-[50px] font-customFont text-customDark">
+      <Helmet>
+        <title>Cart</title>
+      </Helmet>
       <h2 className="text-center ml-[10px] text-[40px]  font-bold mt-[20px]">
         Cart
       </h2>
@@ -173,6 +175,7 @@ const Cart = () => {
                     <div>
                       <img
                         src={JSON.parse(element.product_data).thumbnail}
+                        alt=""
                         className="mx-auto"
                       />
                       <p className="text-[18px] font-bold">
@@ -188,6 +191,7 @@ const Cart = () => {
                         <img
                           src="/icons/minus.svg"
                           className="ml-[10px] mr-[15px] cursor-pointer"
+                          alt=""
                           onClick={() => {
                             decreaseQuantity(
                               element.quantity,
@@ -197,11 +201,15 @@ const Cart = () => {
                           }}
                         />
                         <span className="text-[20px] -mt-[5px]">
-                          {element.quantity}
+                          {element.quantity >
+                          JSON.parse(element.product_data).stock
+                            ? JSON.parse(element.product_data).stock
+                            : element.quantity}
                         </span>
                         <img
                           src="/icons/plus.svg"
                           className="ml-[10px] mr-[15px] cursor-pointer -mt-[2px]"
+                          alt=""
                           onClick={() =>
                             increaseQuantity(
                               element.quantity,
@@ -226,7 +234,10 @@ const Cart = () => {
                         <div
                           className="border-[1px] border-customDark w-[120px] py-[5px] rounded-[3px] duration-300 ease-in-out hover:scale-110 cursor-pointer"
                           onClick={() => {
-                            handleRemove(element.id);
+                            handleRemove(
+                              element.id,
+                              JSON.parse(element.product_data).id
+                            );
                           }}
                         >
                           Remove

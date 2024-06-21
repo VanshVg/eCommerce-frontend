@@ -7,20 +7,6 @@ import { productInterface } from "../interfaces";
 import HomeListing from "../components/home/HomeListing";
 
 const Home = () => {
-  const [products, setProducts] = useState<productInterface[]>();
-
-  useEffect(() => {
-    axios
-      .get("https://dummyjson.com/products/categories")
-      .then((resp) => {
-        if (resp.data) {
-          setProducts(resp.data);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
   return (
     <div>
       <Helmet>

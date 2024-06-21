@@ -16,14 +16,14 @@ const Listing = () => {
       .then((resp) => {
         setProducts(resp.data.products);
       })
-      .catch((error) => {
-        console.log(error);
+      .catch(() => {
+        navigate("/error");
       });
   }, [params.category]);
 
   return (
     <div className="mb-[50px] font-customFont text-customDark">
-      <h2 className="text-center ml-[10px] text-[40px]  font-bold mt-[20px]">
+      <h2 className="text-center ml-[10px] text-[40px] font-bold mt-[20px]">
         {params?.category?.[0].toUpperCase() +
           `${params?.category?.slice(1, params.category.length)}`}
       </h2>
@@ -32,7 +32,7 @@ const Listing = () => {
         {products &&
           products?.map((element: productInterface, index: number) => (
             <div
-              className="bg-silver rounded-[5px] cursor-pointer p-[20px] hover:scale-110 duration-300 ease-in-out w-[calc(100%/4)]"
+              className="bg-silver rounded-[5px] cursor-pointer p-[20px] hover:scale-110 duration-300 ease-in-out w-[calc(100%/4)] mt-[20px]"
               key={index}
               onClick={() => {
                 navigate(`/product/${element.id}`);
