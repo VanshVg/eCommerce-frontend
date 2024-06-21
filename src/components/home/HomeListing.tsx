@@ -31,7 +31,7 @@ const HomeListing = (props: propsType) => {
         {title}
       </h2>
       <div className="h-[1px] bg-customDark mx-auto w-[50%]"></div>
-      <div className="flex justify-center gap-[25px] bg-red px-[30px] mt-[20px]">
+      <div className="flex justify-center gap-[25px] px-[30px] mt-[20px]">
         {product &&
           product.map((element: productInterface, index: number) => (
             <Link to={`/product/${element.id}`}>
