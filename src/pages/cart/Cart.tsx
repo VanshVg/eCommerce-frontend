@@ -11,9 +11,9 @@ import {
 } from "../../redux/reducers/cartReducers";
 import { RootState } from "../../redux/store";
 import { Helmet } from "react-helmet";
+import Cookies, { Cookie } from "universal-cookie";
 
 interface cartInterface {
-  id: number;
   product_data: string;
   quantity: number;
 }
@@ -21,94 +21,127 @@ interface cartInterface {
 const Cart = () => {
   const [cartData, setCartData] = useState<cartInterface[]>();
   const [totalAmount, setTotalAmout] = useState<number>(0);
-  const cart = useSelector((state: RootState) => state.cart);
+  const [data, setData] = useState<any>();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const cookies: Cookie = new Cookies();
+  const token: string | undefined = cookies.get("token");
 
+  const cartStorage = localStorage.getItem("cart");
   useEffect(() => {
-    axios
-      .get(`http://192.168.10.107:4000/cart/get`, { withCredentials: true })
-      .then((resp) => {
-        if (resp.data.success) {
-          setCartData(resp.data.cartData);
-          setTotalAmout(resp.data.totalPrice);
-        }
-      })
-      .catch((error) => {
-        navigate("/error");
+    if (token) {
+      axios
+        .get(`http://192.168.10.107:4000/cart/get`, { withCredentials: true })
+        .then((resp) => {
+          if (resp.data.success) {
+            setCartData(resp.data.cartData);
+            setTotalAmout(resp.data.totalPrice);
+          }
+        })
+        .catch((error) => {
+          navigate("/error");
+        });
+    } else if (cartStorage !== null) {
+      const storageData = JSON.parse(cartStorage);
+      setCartData(storageData);
+      storageData?.forEach((element: cartInterface) => {
+        setTotalAmout(
+          JSON.parse(element.product_data).price * element.quantity
+        );
       });
-  }, [cart]);
+    }
+  }, [data]);
 
   const increaseQuantity = (
     quantity: number,
     stock: number,
-    productId: number,
-    cartId: number
+    productId: number
   ): void => {
     if (quantity !== stock) {
-      axios
-        .put(
-          `http://192.168.10.107:4000/cart/increase/${cartId}`,
-          {},
-          { withCredentials: true }
-        )
-        .then((resp) => {
-          if (resp.data.success) {
-            dispatch(quantityIncrement({ id: productId }));
-          }
-        })
-        .catch((error) => {
-          navigate("/error");
-        });
-    }
-  };
-
-  const decreaseQuantity = (
-    quantity: number,
-    productId: number,
-    cartId: number
-  ): void => {
-    if (quantity !== 1) {
-      axios
-        .put(
-          `http://192.168.10.107:4000/cart/decrease/${cartId}`,
-          {},
-          { withCredentials: true }
-        )
-        .then((resp) => {
-          if (resp.data.success) {
-            dispatch(quantityDecrement({ id: productId }));
-          }
-        })
-        .catch((error) => {
-          navigate("/error");
-        });
-    }
-  };
-
-  const handleRemove = (cartId: number, productId: number) => {
-    axios
-      .delete(`http://192.168.10.107:4000/cart/remove/${cartId}`, {
-        withCredentials: true,
-      })
-      .then((resp) => {
-        if (resp.data.success) {
-          dispatch(removeItem({ id: productId }));
-          Swal.fire({
-            text: "Product removed from cart",
-            icon: "success",
-            showConfirmButton: false,
-            timer: 2000,
+      if (token) {
+        axios
+          .put(
+            `http://192.168.10.107:4000/cart/increase/${productId}`,
+            {},
+            { withCredentials: true }
+          )
+          .then((resp) => {
+            setData(!data);
+            if (resp.data.success) {
+              dispatch(quantityIncrement({ id: productId }));
+            }
+          })
+          .catch((error) => {
+            navigate("/error");
           });
-        }
-      })
-      .catch((error) => {
-        navigate("/error");
+      } else if (cartStorage) {
+        dispatch(quantityIncrement({ id: productId }));
+      }
+    }
+  };
+
+  const decreaseQuantity = (quantity: number, productId: number): void => {
+    if (quantity !== 1) {
+      if (token) {
+        axios
+          .put(
+            `http://192.168.10.107:4000/cart/decrease/${productId}`,
+            {},
+            { withCredentials: true }
+          )
+          .then((resp) => {
+            if (resp.data.success) {
+              setData(!data);
+              dispatch(quantityDecrement({ id: productId }));
+            }
+          })
+          .catch((error) => {
+            navigate("/error");
+          });
+      } else if (cartStorage) {
+        dispatch(quantityDecrement({ id: productId }));
+      }
+    }
+  };
+
+  const handleRemove = (productId: number) => {
+    if (token) {
+      axios
+        .delete(`http://192.168.10.107:4000/cart/remove/${productId}`, {
+          withCredentials: true,
+        })
+        .then((resp) => {
+          if (resp.data.success) {
+            setData(!data);
+            dispatch(removeItem({ id: productId }));
+            Swal.fire({
+              text: "Product removed from cart",
+              icon: "success",
+              showConfirmButton: false,
+              timer: 2000,
+            });
+          }
+        })
+        .catch((error) => {
+          navigate("/error");
+        });
+    } else if (cartStorage) {
+      dispatch(removeItem({ id: productId }));
+      Swal.fire({
+        text: "Product removed from cart",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 2000,
       });
+    }
   };
 
   const handleCheckout = (): void => {
+    if (!token) {
+      navigate("/auth/login");
+      return;
+    }
     Swal.fire({
       title: "Checkout Confirmation",
       icon: "warning",
@@ -158,6 +191,7 @@ const Cart = () => {
                 })
                 .catch((error) => {
                   console.log(error);
+                  navigate("/error");
                 });
             }
           })
@@ -173,6 +207,16 @@ const Cart = () => {
       <Helmet>
         <title>Cart</title>
       </Helmet>
+      {!token ? (
+        <div className="mt-[10px]">
+          <p className="text-[20px]">Login to your account</p>
+          <div className="bg-customDark text-white w-[130px] py-[10px] text-[18px] rounded-[3px] mx-auto duration-300 ease-in-out hover:scale-110 cursor-pointer mt-[15px]">
+            Login
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
       <h2 className="text-center ml-[10px] text-[40px]  font-bold mt-[20px]">
         Cart
       </h2>
@@ -219,8 +263,7 @@ const Cart = () => {
                           onClick={() => {
                             decreaseQuantity(
                               element.quantity,
-                              JSON.parse(element.product_data).id,
-                              element.id
+                              JSON.parse(element.product_data).id
                             );
                           }}
                         />
@@ -234,14 +277,13 @@ const Cart = () => {
                           src="/icons/plus.svg"
                           className="ml-[10px] mr-[15px] cursor-pointer -mt-[2px]"
                           alt=""
-                          onClick={() =>
+                          onClick={() => {
                             increaseQuantity(
                               element.quantity,
                               JSON.parse(element.product_data).stock,
-                              JSON.parse(element.product_data).id,
-                              element.id
-                            )
-                          }
+                              JSON.parse(element.product_data).id
+                            );
+                          }}
                         />
                       </div>
                       <div className="mt-[25px] flex justify-center gap-[8px]">
@@ -258,10 +300,7 @@ const Cart = () => {
                         <div
                           className="border-[1px] border-customDark w-[120px] py-[5px] rounded-[3px] duration-300 ease-in-out hover:scale-110 cursor-pointer"
                           onClick={() => {
-                            handleRemove(
-                              element.id,
-                              JSON.parse(element.product_data).id
-                            );
+                            handleRemove(JSON.parse(element.product_data).id);
                           }}
                         >
                           Remove

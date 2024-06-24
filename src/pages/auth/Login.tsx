@@ -1,11 +1,14 @@
-import { useFormik } from "formik";
+import { replace, useFormik } from "formik";
 import { ChangeEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import login from "../../schemas/login";
 import axios from "axios";
 import { errorInterface } from "../../interfaces";
 import Cookies, { Cookie } from "universal-cookie";
 import { Helmet } from "react-helmet";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/reducers/cartReducers";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const data = {
@@ -18,12 +21,17 @@ const Login = () => {
     message: "",
   });
 
+  const location = useLocation();
+  // console.log(history);
+
   const togglePassword = (): void => {
     setPassword(!password);
   };
 
   const navigate = useNavigate();
   const cookies: Cookie = new Cookies();
+
+  const cartStorage = localStorage.getItem("cart");
 
   const { values, errors, handleBlur, handleChange, submitForm, touched } =
     useFormik({
@@ -38,7 +46,26 @@ const Login = () => {
                 path: "/",
                 expires: new Date(Date.now() + 2592000000),
               });
-              navigate("/");
+              if (cartStorage != null) {
+                const storageData = JSON.parse(cartStorage);
+                axios
+                  .post(
+                    `http://192.168.10.107:4000/cart/add`,
+                    {
+                      cartData: storageData,
+                    },
+                    { withCredentials: true }
+                  )
+                  .then((resp) => {
+                    if (resp.data.success) {
+                      localStorage.removeItem("cart");
+                    }
+                  })
+                  .catch((error) => {
+                    navigate("/error");
+                  });
+              }
+              navigate(-1);
             }
           })
           .catch((error) => {
@@ -79,7 +106,7 @@ const Login = () => {
                 type="text"
                 id="username"
                 name="username"
-                className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-silver bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
+                className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-customDark bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
                 placeholder=""
                 autoComplete="off"
                 value={values.username}
@@ -110,7 +137,7 @@ const Login = () => {
                   type={password ? "text" : "password"}
                   id="password"
                   name="password"
-                  className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-silver bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto "
+                  className="block px-2.5 pb-2.5 pt-4 w-full h-[40px] text-sm text-customDark bg-silver rounded-lg border-[1px] border-customDark appearance-none dark:text-customDark focus:text-customDark dark:border-customDark dark:focus:border-customDark focus:outline-none focus:ring-0 focus:border-customDark peer mx-auto"
                   placeholder=""
                   autoComplete="off"
                   value={values.password}
@@ -160,9 +187,14 @@ const Login = () => {
         </div>
         <p className="mt-[20px] text-customDark">
           New to Team Up?{" "}
-          <Link to={"/auth/register"} className="text-link hover:underline">
+          <span
+            className="text-link hover:underline cursor-pointer"
+            onClick={() => {
+              navigate("/auth/register", { replace: true });
+            }}
+          >
             Register
-          </Link>
+          </span>
         </p>
       </div>
     </div>

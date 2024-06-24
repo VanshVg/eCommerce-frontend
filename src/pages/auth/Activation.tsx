@@ -2,10 +2,13 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import Cookies, { Cookie } from "universal-cookie";
 
 const Activation = () => {
   const params = useParams();
   const navigate = useNavigate();
+
+  const cartStorage = localStorage.getItem("cart");
 
   const [activationError, setActivationError] = useState({
     type: "",
@@ -27,6 +30,26 @@ const Activation = () => {
       )
       .then((resp) => {
         if (resp.data.success) {
+          if (cartStorage != null) {
+            const storageData = JSON.parse(cartStorage);
+            axios
+              .post(
+                `http://192.168.10.107:4000/cart/add`,
+                {
+                  cartData: storageData,
+                },
+                { withCredentials: true }
+              )
+              .then((resp) => {
+                if (resp.data.success) {
+                  localStorage.removeItem("cart");
+                  navigate("/");
+                }
+              })
+              .catch((error) => {
+                navigate("/error");
+              });
+          }
         }
       })
       .catch((error) => {
@@ -65,12 +88,14 @@ const Activation = () => {
               Your account has been activated.
             </p>
             <p className="text-fontBlue">
-              <Link
-                to={"/"}
+              <span
                 className="text-link cursor-pointer hover:underline"
+                onClick={() => {
+                  navigate(-1);
+                }}
               >
                 Click here to continue
-              </Link>
+              </span>
             </p>
           </>
         )}

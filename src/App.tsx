@@ -36,10 +36,8 @@ function App() {
           <Route path="/list/fashion" element={<FashionItems />}></Route>
           <Route path="/list/:category" element={<Listing />}></Route>
           <Route path="/product/:id" element={<ProductDetails />}></Route>
-          <Route element={<Protected />}>
-            <Route path="/cart" element={<Cart />}></Route>
-            <Route path="/orders" element={<Orders />}></Route>
-          </Route>
+          <Route path="/cart" element={<Cart />}></Route>
+          <Route path="/orders" element={<Orders />}></Route>
           <Route path="*" element={<Error />}></Route>
         </Routes>
       </Router>

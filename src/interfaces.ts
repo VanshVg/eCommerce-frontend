@@ -76,7 +76,7 @@ export interface productDetailsInterface {
 }
 
 export interface cartInterface {
-  productData: productDetailsInterface;
+  product_data: string;
   quantity: number;
 }
 

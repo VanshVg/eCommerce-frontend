@@ -5,15 +5,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import { productDetailsInterface } from "../interfaces";
 import { Rating } from "@mui/material";
 import Cookies, { Cookie } from "universal-cookie";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/reducers/cartReducers";
 import Swal from "sweetalert2";
 import { Helmet } from "react-helmet";
+import { RootState } from "../redux/store";
 
 const ProductDetails = () => {
   const [productData, setProductData] = useState<productDetailsInterface>();
   const [quantity, setQuantity] = useState<number>(1);
   const [showCart, setShowCart] = useState<boolean>(false);
+
+  const cartData = useSelector((state: RootState) => state.cart);
+  console.log(cartData);
 
   const params = useParams();
   const cookies: Cookie = new Cookies();
@@ -48,19 +52,27 @@ const ProductDetails = () => {
   const handleCart = (): void => {
     const token: string = cookies.get("token");
     if (!token) {
-      navigate("/auth/login");
+      console.log(quantity);
+      dispatch(addToCart({ product_data: productData, quantity: quantity }));
+      Swal.fire({
+        text: "Product added to cart",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 2000,
+      });
       return;
     }
     axios
       .post(
-        `http://192.168.10.107:4000/cart/add`,
+        `http://192.168.10.107:4000/cart/addOne`,
         { productData: productData, quantity: quantity },
         { withCredentials: true }
       )
       .then((resp) => {
         if (resp.data.success) {
-          setShowCart(true);
-          dispatch(addToCart({ productData: productData, quantity: quantity }));
+          dispatch(
+            addToCart({ product_data: productData, quantity: quantity })
+          );
           Swal.fire({
             text: "Product added to cart",
             icon: "success",
@@ -70,8 +82,10 @@ const ProductDetails = () => {
         }
       })
       .catch((error) => {
+        console.log(error);
         navigate("/error");
       });
+    setShowCart(true);
   };
 
   const handleBuy = (): void => {

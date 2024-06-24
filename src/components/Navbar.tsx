@@ -1,11 +1,12 @@
 import { Tooltip } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Cookies, { Cookie } from "universal-cookie";
 import { RootState } from "../redux/store";
 import Swal from "sweetalert2";
+import { checkout } from "../redux/reducers/cartReducers";
 
 interface categoryInterface {
   slug: string;
@@ -20,10 +21,12 @@ const Navbar = () => {
   const { pathname } = useLocation();
   const cookies: Cookie = new Cookies();
   const navigate = useNavigate();
-
   const token: string = cookies.get("token");
 
   const cartData = useSelector((state: RootState) => state.cart);
+  const dispatch = useDispatch();
+
+  const cartStorage = localStorage.getItem("cart");
 
   useEffect(() => {
     axios
@@ -38,7 +41,19 @@ const Navbar = () => {
 
   useEffect(() => {
     if (token) {
-      setCountCart(cartData.cart.length);
+      axios
+        .get(`http://192.168.10.107:4000/cart/get`, { withCredentials: true })
+        .then((resp) => {
+          if (resp.data.success) {
+            setCountCart(resp.data.cartData.length);
+          }
+        })
+        .catch((error) => {
+          navigate("/error");
+        });
+    } else if (cartStorage) {
+      const storageData = JSON.parse(cartStorage);
+      setCountCart(storageData.length);
     }
   }, [cartData, cookies]);
 
@@ -61,13 +76,15 @@ const Navbar = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         cookies.remove("token", { path: "/" });
+        setCountCart(0);
+        dispatch(checkout());
+        localStorage.clear();
         Swal.fire({
           text: "Logout successful",
           icon: "warning",
           showConfirmButton: false,
           timer: 2000,
         });
-        setCountCart(0);
         navigate("/");
       }
     });

@@ -51,6 +51,7 @@ const Register = () => {
             }
           })
           .catch((error) => {
+            console.log(error);
             if (error.response.data.type === "server") {
               navigate("/error");
             } else if (!error.response.data.success) {
@@ -240,11 +241,13 @@ const Register = () => {
         </form>
         <div className="text-link hover:underline mt-[5px] -mb-[15px]">
           {activation ? (
-            <Link
-              to={`http://192.168.10.107:3000/auth/activation/${activation}`}
+            <span
+              onClick={() => {
+                navigate(`/auth/activation/${activation}`, { replace: true });
+              }}
             >
               http://192.168.10.107:3000/auth/activation/{activation}
-            </Link>
+            </span>
           ) : (
             ""
           )}
@@ -258,9 +261,14 @@ const Register = () => {
         </div>
         <p className="mt-[20px] text-customDark">
           Already a user?{" "}
-          <Link to={"/auth/login"} className="text-link hover:underline">
+          <span
+            className="text-link hover:underline"
+            onClick={() => {
+              navigate("/auth/login", { replace: true });
+            }}
+          >
             Login
-          </Link>
+          </span>
         </p>
       </div>
     </div>
